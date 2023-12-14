@@ -63,17 +63,14 @@ int* read_indexes(FILE *f, int *n_out, int *k_out) {
 
 
 int write_points(FILE *f, int32_t n, int32_t d, double *data) {
-  // Write number of points.
   if (fwrite(&n, sizeof(int32_t), 1, f) != 1) {
     return 1;
   }
 
-  // Write number of values for each point (dimensionality).
   if (fwrite(&d, sizeof(int32_t), 1, f) != 1) {
     return 1;
   }
 
-  // Write the raw point data.
   if ((int)fwrite(data, d*sizeof(double), n, f) != n) {
     return 1;
   }
@@ -82,17 +79,14 @@ int write_points(FILE *f, int32_t n, int32_t d, double *data) {
 }
 
 int write_indexes(FILE *f, int32_t n, int32_t k, int *data) {
-  // Write number of points.
   if (fwrite(&n, sizeof(int32_t), 1, f) != 1) {
     return 1;
   }
 
-  // Write number of indexes for each point.
   if (fwrite(&k, sizeof(int32_t), 1, f) != 1) {
     return 1;
   }
 
-  // Write the raw point data.
   if ((int)fwrite(data, k*sizeof(int), n, f) != n) {
     return 1;
   }
