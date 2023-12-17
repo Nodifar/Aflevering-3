@@ -33,6 +33,9 @@ declare -a COMBINATIONS=(
     "40 30 20 10"
     "10 20 30 40"
 
+    # Curse of dimensionality
+    "100 50 400 30"
+
 )
 
 echo "Running small, medium and large tests."
