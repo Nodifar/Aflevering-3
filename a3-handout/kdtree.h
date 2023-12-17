@@ -38,4 +38,7 @@ int* kdtree_knn(const struct kdtree *tree, int k, const double* query);
 // up point coordinates as indicated.
 void kdtree_svg(double scale, FILE* f, const struct kdtree *tree);
 
+struct node;
+struct kdtree;
+
 #endif

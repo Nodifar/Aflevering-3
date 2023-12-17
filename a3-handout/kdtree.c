@@ -76,14 +76,13 @@ struct kdtree *kdtree_create(int d, int n, const double *points) {
 }
 
 void kdtree_free_node(struct node *node) {
-  if (node->left != NULL) {
-    kdtree_free_node(node->left);
-  } else if(node->right != NULL) {
-    kdtree_free_node(node->right);
-  } else {
-    free(node);
-  }
+    if (node != NULL) {
+        kdtree_free_node(node->left);
+        kdtree_free_node(node->right);
+        free(node);
+    }
 }
+
 
 void kdtree_free(struct kdtree *tree) {
   kdtree_free_node(tree->root);
@@ -91,24 +90,27 @@ void kdtree_free(struct kdtree *tree) {
 }
 
 void kdtree_knn_node(const struct kdtree *tree, int k, const double* query, int *closest, double *radius, const struct node *node) {
-  if (node == NULL) {
-    return;
-  } 
-  int d = tree->d;
-  const double* points = tree->points;
-  int idx = smallest_idx(k, closest);
-  if(insert_if_closer(k, d, points, closest, query, node->point_index)) {
-    *radius = distance(d, &points[closest[idx]*d], query);
-  }
-  double diff = points[node->point_index*d+node->axis] - query[node->axis];
-  if(diff >= 0 || *radius > fabs(diff)) {
-    kdtree_knn_node(tree, k, query, closest, radius, node->left);
-  }
-  if(diff <= 0 || *radius > fabs(diff)) {
-    kdtree_knn_node(tree, k, query, closest, radius, node->right);
-  }
-  return;
+    if (node == NULL) {
+        return;
+    } 
+    int d = tree->d;
+    const double* points = tree->points;
+    int idx = smallest_idx(k, closest);
+
+    if(insert_if_closer(k, d, points, closest, query, node->point_index)) {
+        idx = smallest_idx(k, closest); // Re-evaluate idx as it might have changed
+        *radius = distance(d, &points[closest[idx]*d], query);
+    }
+
+    double diff = points[node->point_index*d+node->axis] - query[node->axis];
+    if(d == 1 || diff >= 0 || *radius > fabs(diff)) {
+      kdtree_knn_node(tree, k, query, closest, radius, node->left);
+    }
+    if(d == 1 || diff <= 0 || *radius > fabs(diff)) {
+      kdtree_knn_node(tree, k, query, closest, radius, node->right);
+    }
 }
+
 
 int* kdtree_knn(const struct kdtree *tree, int k, const double* query) {
   int* closest = malloc(k * sizeof(int));
@@ -132,7 +134,7 @@ void kdtree_svg_node(double scale, FILE *f, const struct kdtree *tree,
 
   double coord = tree->points[node->point_index*2+node->axis];
   if (node->axis == 0) {
-    // Split the X axis, so vertical line.
+    // x split
     fprintf(f, "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke-width=\"1\" stroke=\"black\" />\n",
             coord*scale, y1*scale, coord*scale, y2*scale);
     kdtree_svg_node(scale, f, tree,
@@ -142,7 +144,7 @@ void kdtree_svg_node(double scale, FILE *f, const struct kdtree *tree,
                     coord, y1, x2, y2,
                     node->right);
   } else {
-    // Split the Y axis, so horizontal line.
+    // y split
     fprintf(f, "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke-width=\"1\" stroke=\"black\" />\n",
             x1*scale, coord*scale, x2*scale, coord*scale);
     kdtree_svg_node(scale, f, tree,
@@ -158,10 +160,3 @@ void kdtree_svg(double scale, FILE* f, const struct kdtree *tree) {
   assert(tree->d == 2);
   kdtree_svg_node(scale, f, tree, 0, 0, 1, 1, tree->root);
 }
-<<<<<<< HEAD
-
-
-
-
-=======
->>>>>>> 4eb974b16bcf30b5cb90115adcc24287f52553cf
