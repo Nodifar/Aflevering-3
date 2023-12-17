@@ -19,9 +19,14 @@ knn-genpoints: knn-genpoints.o io.o
 knn-svg: knn-svg.o io.o util.o kdtree.o sort.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-# Add a new build rule for correct
 correct: correct.o io.o util.o
 	$(CC) -o $@ $^ $(LDFLAGS)
+
+set-permissions:
+	chmod +x correct
+	chmod +x test_knn.sh
+
+
 
 # A general rule that tells us how to generate an .o file from a .c
 # file.  This cuts down on the boilerplate.
@@ -29,7 +34,7 @@ correct: correct.o io.o util.o
 	$(CC) -c $< $(CFLAGS)
 
 clean:
-	rm -rf knn-genpoints knn-bruteforce knn-svg knn-kdtree *.o *.dSYM
+	rm -rf knn-genpoints knn-bruteforce knn-svg knn-kdtree correct *.o *.dSYM
 	rm -rf points queries indexes points.svg
 
 # Testing rules
@@ -47,9 +52,8 @@ DIM_LARGE=4
 K_LARGE=10
 
 
-# Define a rule for each test set
 
-test_medium: 
+test_medium: correct set-permissions
 	@echo "TESTING STARTING! WARNING MAY TAKE A WHILE\n"
 	@echo "Bruteforce testing\n"
 	./knn-genpoints $(NUM_POINTS_MEDIUM) $(DIM_MEDIUM) > points
@@ -57,13 +61,13 @@ test_medium:
 	./knn-bruteforce points queries $(K_MEDIUM) indexes
 	./correct points queries indexes
 
-test_large: 
+test_large: correct set-permissions
 	./knn-genpoints $(NUM_POINTS_LARGE) $(DIM_LARGE) > points
 	./knn-genpoints $(NUM_QUERIES_LARGE) $(DIM_LARGE) > queries
 	./knn-bruteforce points queries $(K_LARGE) indexes
 	./correct points queries indexes
 
-# Update the 'test' rule to run all tests
+
 test: test_medium test_large
 	@echo "\nComparing bruteforce with kdtree test\n"
 	./test_knn.sh
