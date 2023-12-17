@@ -1,6 +1,6 @@
 #ifndef KNN_UTIL_H
 #define KNN_UTIL_H
-
+int smallest_idx(int k, int *closest);
 // Compute the Euclidean distance between two d-dimensional points 'x'
 // and 'y'.  Usual formula:
 //
